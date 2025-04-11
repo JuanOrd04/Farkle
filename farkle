@@ -32,7 +32,6 @@ public class farkle {
     int puntajeActual = 0;
     int rondaActual = 1;
     int jugadorActual = 0;
-
     int jugadores = 0;
     int puntosParaGanar = 0;
     int[] puntajes;
@@ -89,14 +88,10 @@ public class farkle {
 
     private void pedirDatosIniciales() {
         String jugadoresStr = JOptionPane.showInputDialog(ventana, "¿Cuántos jugadores van a jugar?");
-        if (jugadoresStr != null) {
-            jugadores = Integer.parseInt(jugadoresStr);
-        }
+        if (jugadoresStr != null) jugadores = Integer.parseInt(jugadoresStr);
 
         String puntosStr = JOptionPane.showInputDialog(ventana, "¿Cuántos puntos se necesitan para ganar?");
-        if (puntosStr != null) {
-            puntosParaGanar = Integer.parseInt(puntosStr);
-        }
+        if (puntosStr != null) puntosParaGanar = Integer.parseInt(puntosStr);
 
         puntajes = new int[jugadores];
     }
@@ -130,15 +125,9 @@ public class farkle {
         }
 
         contenedorBotones.removeAll();
-        for (ActionListener al : botonTirar.getActionListeners()) {
-            botonTirar.removeActionListener(al);
-        }
-        for (ActionListener al : botonPuntuar.getActionListeners()) {
-            botonPuntuar.removeActionListener(al);
-        }
-        for (ActionListener al : botonParar.getActionListeners()) {
-            botonParar.removeActionListener(al);
-        }
+        for (ActionListener al : botonTirar.getActionListeners()) botonTirar.removeActionListener(al);
+        for (ActionListener al : botonPuntuar.getActionListeners()) botonPuntuar.removeActionListener(al);
+        for (ActionListener al : botonParar.getActionListeners()) botonParar.removeActionListener(al);
 
         botonTirar.addActionListener(e -> tirarDados());
         botonPuntuar.addActionListener(e -> puntuar());
@@ -171,25 +160,49 @@ public class farkle {
     }
 
     private void tirarDados() {
+        boolean algunDadoLanzado = false;
         for (int i = 0; i < botonesDados.length; i++) {
             if (estadoBoton[i] == DADO_CALIENTE) {
                 int valor = (int) (Math.random() * 6);
                 valorDado[i] = valor;
                 botonesDados[i].setIcon(iconosImagenes[valor]);
                 botonesDados[i].setEnabled(true);
+                algunDadoLanzado = true;
             }
         }
+
         botonTirar.setEnabled(false);
         botonPuntuar.setEnabled(true);
         botonParar.setEnabled(false);
+
+        if (algunDadoLanzado && !hayCombinacionPuntuable()) {
+            JOptionPane.showMessageDialog(ventana, "¡Haz hecho Farkle!");
+            puntajeActual = 0;
+            pasarAlSiguienteJugador();
+        }
+    }
+
+    private boolean hayCombinacionPuntuable() {
+        int[] conteoValores = new int[7];
+        for (int i = 0; i < botonesDados.length; i++) {
+            if (estadoBoton[i] == DADO_CALIENTE) {
+                conteoValores[valorDado[i] + 1]++;
+            }
+        }
+
+        if (conteoValores[1] > 0 || conteoValores[5] > 0) return true;
+
+        for (int i = 1; i <= 6; i++) {
+            if (conteoValores[i] >= 3) return true;
+        }
+
+        return false;
     }
 
     private void puntuar() {
         int[] conteoValores = new int[7];
         for (int i = 0; i < botonesDados.length; i++) {
-            if (estadoBoton[i] == DADO_PUNTUADO) {
-                conteoValores[valorDado[i] + 1]++;
-            }
+            if (estadoBoton[i] == DADO_PUNTUADO) conteoValores[valorDado[i] + 1]++;
         }
 
         if ((conteoValores[2] > 0 && conteoValores[2] < 3) ||
@@ -314,3 +327,4 @@ public class farkle {
         SwingUtilities.invokeLater(farkle::new);
     }
 }
+
