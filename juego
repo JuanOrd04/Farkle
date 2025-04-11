@@ -1,4 +1,4 @@
-public class main {
+public class juego {
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(farkle::new);
     }
